@@ -41,9 +41,15 @@ def is_proper_json(response):
 
 # Checks all parameters for a user dictionary
 def is_user_datatypes(user):
-    return is_id(user['id']) and is_name(user['name']) and is_email(user['email']) and \
-        is_gender(user['gender']) and is_status(user['status']) and is_time(user['created_at'])\
-            and is_time(user['updated_at'])
+    return all([
+        is_id(user['id']),
+        is_name(user['name']),
+        is_email(user['email']),
+        is_gender(user['gender']),
+        is_status(user['status']),
+        is_time(user['created_at']),
+        is_time(user['updated_at'])
+    ])
 
 # Converts response JSONs into string form and verifies they are equal.
 def is_same_response(response1, response2):
@@ -54,4 +60,24 @@ def is_same_response(response1, response2):
     else:
         assert 0
         return False
-    
+
+# Converts response JSONs into string form and verifies they are equal.
+def correctly_posted_user(response_get_dict, payload):
+    return all([
+        response_get_dict['name'] ==  payload['name'],
+        response_get_dict['email'] ==  payload['email'],
+        response_get_dict['gender'] ==  payload['gender'],
+        response_get_dict['status'] ==  payload['status'],
+    ])
+
+def user_resource_exists(url):
+    response = requests.get(url)
+    return response.status_code == requests.codes.ok
+
+def user_resource_delete(url, token):
+    access_token_header = "Bearer " + token
+    response = requests.delete(
+        url = url,
+        headers={"Authorization": access_token_header}
+    )
+    return response.status_code == requests.codes.ok
