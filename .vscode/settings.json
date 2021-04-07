@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "python.pythonPath": "api_testing_venv/bin/python3"
+    },
+    "python.pythonPath": "api_testing_venv/bin/python"
+}

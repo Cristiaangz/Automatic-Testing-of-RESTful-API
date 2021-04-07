@@ -1,2 +1,3 @@
-# Automatic-Testing-of-RESTful-API
-Python Script using PyTest meant to perform automated testing of endpoint verification for RESTful API.
+# Automatic Testing of RESTful API
+## Description
+This repository contains Python scripts performing automated endpoint verification for RESTful API using pytest.

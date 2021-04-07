@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"python.pythonPath": "api_testing_venv/bin/python3"
+		}
+	}
+}
