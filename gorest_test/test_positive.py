@@ -3,13 +3,15 @@ from verification import *
 class Test_GET_User:
 
     def test_GET_basic(self):
+        global main_url
+        global user_endpoint
         errors = []
         url = main_url + user_endpoint
-        response = requests.get(main_url + user_endpoint)
-        if response.status_code != requests.codes.ok:
-            errors.append("Status Code Error: received {}, expected 200".format(response.status_code))
+        response = requests.get(url)
         response_dict = is_proper_json(response)
         if response_dict != False:
+            if response_dict['code'] != requests.codes.ok:
+                errors.append("Status Code Error: received {}, expected 200".format(response_dict['code']))
             wrong_user_cnt = 0
             for user in response_dict['data']:
                 if not is_user_datatypes(user):
@@ -25,10 +27,12 @@ class Test_GET_User:
         assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
     
     def test_GET_idempotency(self):
+        global main_url
+        global user_endpoint
         errors = []
         url = main_url + user_endpoint
-        response1 = requests.get(main_url + user_endpoint)
-        response2 = requests.get(main_url + user_endpoint)
+        response1 = requests.get(url)
+        response2 = requests.get(url)
         if not is_same_response(response1, response2):
             errors.append("Response JSONs are not the same")
         assert not errors, "Errors Occured:\n{}".format("\n".join(errors))

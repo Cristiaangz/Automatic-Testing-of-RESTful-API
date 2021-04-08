@@ -7,15 +7,14 @@ import random
 import os.path
 
 def setup_module(module):
+    print("\n------------- SETUP -------------")
     global main_url
     global user_endpoint
-    global user_123_endpoint
     global token
     global valid_payload
     global timeout_threshold, user_123_payload
     main_url = "https://gorest.co.in"
     user_endpoint = "/public-api/users"
-    user_123_endpoint = "/public-api/users/123"
     timeout_threshold = 1.000
     valid_payload = {
             "name": "Dan Doney",
