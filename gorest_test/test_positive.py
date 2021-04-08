@@ -82,44 +82,7 @@ class Test_POST_User:
             
         assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
 
-class Test_GET_User_123:
+class Test_PUT_User_Resource:
 
-    def test_statuscode(self):
-        assert 1
-
-    def test_payload(self):
-        assert 1
-    
-    def test_state(self):
-        assert 1
-    
-    def test_min_performance(self):
-        assert 1
-
-class Test_PUT_User_123:
-
-    def test_statuscode(self):
-        assert 1
-
-    def test_payload(self):
-        assert 1
-    
-    def test_state(self):
-        assert 1
-    
-    def test_min_performance(self):
-        assert 1
-
-class Test_DELETE_User_123:
-
-    def test_statuscode(self):
-        assert 1
-
-    def test_payload(self):
-        assert 1
-    
-    def test_state(self):
-        assert 1
-    
-    def test_min_performance(self):
+    def test_PUT_basic(self):
         assert 1

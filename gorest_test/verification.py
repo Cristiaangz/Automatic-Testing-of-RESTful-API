@@ -161,3 +161,23 @@ def make_email_free(url, email, token):
     else:
         print("GET method was unsuccessful ({})".format(response.status_code))
         return False
+
+def make_resource_empty(url, token):
+    print("\nVerifying if {} exists".format(email))
+    response = requests.get(url, params={'email': email})
+    if response.status_code == requests.codes.ok:
+        print("GET method successful")
+        try:
+            response_dict = response.json()
+            if response_dict['code'] == requests.codes.not_found:
+                print('{} is free'.format(email))
+                return True
+            else:
+                print('Result found. Attempting to delete')
+                return user_resource_delete(url = url, token = token)
+        except:
+            print ("Unexpected error:", sys.exc_info()[0])
+            return False
+    else:
+        print("GET method was unsuccessful ({})".format(response.status_code))
+        return False
