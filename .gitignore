@@ -1,1 +1,5 @@
 token.txt
+gorest_test/__pycache__/verification.cpython-39.pyc
+.gitignore
+gorest_test/__pycache__/test_positive.cpython-39.pyc
+gorest_test/__pycache__/test_positive.cpython-39-pytest-6.2.3.pyc
