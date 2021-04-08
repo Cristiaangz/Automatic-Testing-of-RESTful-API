@@ -28,18 +28,13 @@ def setup_module(module):
 
 class Test_GET_User:
 
-    def test_statuscode(self):
+    def test_GET_basic(self):
         errors = []
+        threshold = 1.000
         url = main_url + user_endpoint
         response = requests.get(main_url + user_endpoint)
         if response.status_code != requests.codes.ok:
-            errors.append("Status Code is "+ str(response.status_code))
-        assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
-
-    def test_payload(self):
-        errors = []
-        url = main_url + user_endpoint
-        response = requests.get(main_url + user_endpoint)
+            errors.append("Status Code Error: received {}, expected 200".format(response.status_code))
         response_dict = is_proper_json(response)
         if response_dict != False:
             wrong_user_cnt = 0
@@ -47,31 +42,22 @@ class Test_GET_User:
                 if not is_user_datatypes(user):
                     wrong_user_cnt += 1
             if wrong_user_cnt > 0:
-                errors.append("Users with wrong datatypes: "+ str(wrong_user_cnt))
+                errors.append("Payload Error: {} of the received users have wrong datatypes: ".format(wrong_user_cnt))
         else:
-            errors.append("Received a malformed JSON")
-        
-        assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
+            errors.append("Payload Error: Received a malformed JSON")
+        if response.elapsed.total_seconds() > threshold:
+            errors.append("Performance Error: Response took {:.2f}ms. Threshold is {:.2f}ms"\
+                .format(response.elapsed.total_seconds()*1000, threshold*1000))
 
+        assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
     
-    def test_state(self):
+    def test_idempotency(self):
         errors = []
         url = main_url + user_endpoint
         response1 = requests.get(main_url + user_endpoint)
         response2 = requests.get(main_url + user_endpoint)
         if not is_same_response(response1, response2):
             errors.append("Response JSONs are not the same")
-        assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
-    
-    def test_min_performance(self):
-        threshold = 1.000
-        errors = []
-        url = main_url + user_endpoint
-        response = requests.get(main_url + user_endpoint)
-        if response.elapsed.total_seconds() > threshold:
-            errors.append("Response took {}ms, larger than {}ms threshold"\
-                .format(str(response.elapsed.total_seconds()*1000), str(threshold*1000)))
-
         assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
 
 class Test_POST_User:
