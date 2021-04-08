@@ -2,6 +2,45 @@ import pytest
 import requests
 import json
 import datetime
+import sys
+
+def setup_module(module):
+    global main_url
+    global user_endpoint
+    global user_123_endpoint
+    global token
+    global valid_payload
+    global timeout_threshold, user_123_payload
+    main_url = "https://gorest.co.in"
+    user_endpoint = "/public-api/users"
+    user_123_endpoint = "/public-api/users/123"
+    timeout_threshold = 1.000
+    valid_payload = {
+            "name": "Dan Doney",
+            "email": "dan@securrency.com",
+            "gender" : "Male",
+            "status" : "Active",
+        }
+
+    user_123_payload = {
+            "id" : 1,
+            "name": "Ilya Shkapo",
+            "email": "ilya@securrency.com",
+            "gender" : "Male",
+            "status" : "Inactive",
+        }
+    
+    if os.path.isfile("token.txt"):
+        f = open("token.txt", "r")
+        token = f.readline()
+        f.close()
+    else:
+        token = ''
+        while token == '':
+            token = input("\n\nToken file not found. Please enter gorest.co.in token:\n")
+            if len(token) != 64:
+                print("Error: Token must be 64 characters long")
+                token = ''
 
 # Valid ID must be a non-negative integer
 def is_id(id):
@@ -81,3 +120,44 @@ def user_resource_delete(url, token):
         headers={"Authorization": access_token_header}
     )
     return response.status_code == requests.codes.ok
+
+def verify_email_free(url, email):
+    print("\nVerifying if {} exists".format(email))
+    response = requests.get(url, params={'email': email})
+    if response.status_code == requests.codes.ok:
+        print("GET method successful")
+        try:
+            response_dict = response.json()
+            if response_dict['meta']['pagination']['total'] != 1:
+                print('{} is free'.format(email))
+                return True
+            elif response_dict['data'][0]['email'] == email:
+                return False
+        except:
+            print ("Unexpected error:", sys.exc_info()[0])
+            return False
+    else:
+        print("GET method was unsuccessful ({})".format(response.status_code))
+        return None
+
+def make_email_free(url, email, token):
+    print("\nVerifying if {} exists".format(email))
+    response = requests.get(url, params={'email': email})
+    if response.status_code == requests.codes.ok:
+        print("GET method successful")
+        try:
+            response_dict = response.json()
+            if response_dict['meta']['pagination']['total'] != 1:
+                print('{} is free'.format(email))
+                return True
+            elif response_dict['data'][0]['email'] == email:
+                print('Result found. Attempting to delete')
+                user_id = response_dict['data'][0]['id']
+                user_url = url + '/{}'.format(user_id)
+                return user_resource_delete(url = user_url, token=token)
+        except:
+            print ("Unexpected error:", sys.exc_info()[0])
+            return False
+    else:
+        print("GET method was unsuccessful ({})".format(response.status_code))
+        return False
