@@ -1,11 +1,10 @@
-import pytest
-import requests
-import json
+from verification import *
 
 
 class Test_GET_User:
 
     def test_missing_resource(self):
+
         assert 1
 
 class Test_POST_User:

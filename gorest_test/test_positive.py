@@ -1,9 +1,3 @@
-import pytest
-import requests
-import json
-import datetime
-import random
-import os.path
 from verification import *
 
 class Test_GET_User:

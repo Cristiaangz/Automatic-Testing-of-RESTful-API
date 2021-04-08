@@ -3,6 +3,8 @@ import requests
 import json
 import datetime
 import sys
+import random
+import os.path
 
 def setup_module(module):
     global main_url
