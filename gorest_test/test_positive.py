@@ -66,7 +66,7 @@ class Test_POST_User:
                 response_get_dict = response_get.json()
                 if response_get_dict['code'] == requests.codes.ok:
                     # Verify GET response and payload are the same.
-                    if not correctly_posted_user(response_get_dict['data'],valid_payload):
+                    if not same_user(response_get_dict['data'],valid_payload):
                         errors.append('Payload Error: User data in database and payload is not the same')
 
                     # Delete user created by POST
@@ -83,7 +83,7 @@ class Test_POST_User:
 
 class Test_PUT_User_Resource:
 
-    def test_PUT_integrated(self, user_endpoint, valid_payload2, token, timeout_threshold):
+    def test_PUT_integrated(self, user_endpoint, valid_payload, token, timeout_threshold):
         errors = []
         # PUT new user information to user created by POST
         user_id = str(get_valid_user_id(user_endpoint))
@@ -91,19 +91,18 @@ class Test_PUT_User_Resource:
         access_token_header = {"Authorization": "Bearer " + token}
         response_put = requests.put(
             url = user_url,
-            data = valid_payload2,
+            data = valid_payload,
             headers = access_token_header
         )
-        print('Response: '.format(response_put))
         
         # Verify PUT status code
-        response_put_dict = is_proper_json(response_put)
-        if response_put_dict != False:
+        if response_put.status_code == requests.codes.ok:
+            response_put_dict = response_put.json()
             print('\nResponse PUT:\n{}'.format(response_put_dict))
             if response_put_dict['code'] == requests.codes.ok:
 
                 # Verify GET response and payload are the same.
-                if not correctly_put_user(response_put_dict['data'],valid_payload2):
+                if not correctly_put_user(response_put_dict['data'],valid_payload):
                     errors.append('State Error: User data in database and payload is not the same')
             else:
                 errors.append('Error: PUT method unsucessful. Received {}, Expected 200'\
@@ -113,11 +112,12 @@ class Test_PUT_User_Resource:
             if not user_resource_delete(url = user_url, token = token):
                 errors.append('Clean Up Error: Failed to delete modified user (ID: {})'.format(user_id))
         else:
-            errors.append("Server Error: Received a malformed JSON")
+            errors.append("Server Error: PUT request Failed. Received {}, expected 200"\
+                .format(response_put.status_code))
             
         assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
 
-    def test_PUT_idempotency(self, user_endpoint, valid_payload2, token):
+    def test_PUT_idempotency(self, user_endpoint, valid_payload, token):
         errors = []
         # PUT new user information to user created by POST
         user_id = str(get_valid_user_id(user_endpoint))
@@ -125,12 +125,12 @@ class Test_PUT_User_Resource:
         access_token_header = {"Authorization": "Bearer " + token}
         response_put_1 = requests.put(
             url = user_url,
-            data = valid_payload2,
+            data = valid_payload,
             headers = access_token_header
         )
         response_put_2 = requests.put(
             url = user_url,
-            data = valid_payload2,
+            data = valid_payload,
             headers = access_token_header
         )
         if response_put_1.status_code == response_put_2.status_code == requests.codes.ok:

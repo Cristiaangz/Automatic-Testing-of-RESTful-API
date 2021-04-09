@@ -210,5 +210,103 @@ class Test_POST_User:
 
 class Test_PUT_User_Resource:
 
-    def test_empty_resource(self):
-        assert 1
+    def test_empty_resource(self, user_endpoint, valid_payload, token, timeout_threshold):
+        errors = []
+
+        # PUT new user information to user created by POST
+        user_url = user_endpoint + "/123"
+        if make_resource_empty(user_url, token):
+            response_get = requests.get(user_url)
+            access_token_header = {"Authorization": "Bearer " + token}
+            response_put = requests.put(
+                url = user_url,
+                data = valid_payload,
+                headers = access_token_header
+            )
+            if response_put.status_code == requests.codes.ok:
+                response_get_dict = response_get.json()
+                if response_get_dict['code'] != requests.codes.not_found:
+                    errors.append("Status Code Error: Received {}, Expected 404".format(response_get_dict['code']))
+            else:
+                errors.append('Request Error: Response is {}, Expected 200 '\
+                    .format(response_put.status_code))
+        else:
+            errors.append("Test Error: Could not verify /public-api/user/{} is deleted")
+
+        assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
+    
+    def test_unauthorized(self, user_endpoint, valid_payload, invalid_token, timeout_threshold):
+        errors = []
+        user_id = str(get_valid_user_id(user_endpoint))
+        url = user_endpoint + "/" + user_id
+        invalid_token_header = "Bearer " + invalid_token
+        response_put = requests.put(
+            url = url,
+            data = valid_payload,
+            headers={"Authorization": invalid_token_header})
+        # Verify Performance
+        if response_put.elapsed.total_seconds() > timeout_threshold:
+            errors.append("Performance Error: Response took {:.2f}ms. Threshold is {:.2f}ms"\
+                .format(response_put.elapsed.total_seconds()*1000, timeout_threshold*1000))
+        
+        # Verify Response is a well-formed JSON
+        response_put_dict = is_proper_json(response_put)
+        if response_put_dict != False:
+            # Verify status code in response
+            if response_put_dict['code'] != 401:\
+                errors.append("Status Code Error: Received {}.Expected 401"\
+                    .format(response_put_dict['code']))
+        else:
+            print("Server Error")
+            errors.append("Server Error: Received a malformed JSON")
+        
+        assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
+
+    def test_wrong_datatype(self, user_endpoint, invalid_datatype_payload, token, timeout_threshold):
+        errors = []
+        # PUT new user information to user created by POST
+        user_id = str(get_valid_user_id(user_endpoint))
+        user_url = user_endpoint + "/" + user_id
+        access_token_header = {"Authorization": "Bearer " + token}
+        response_put = requests.put(
+            url = user_url,
+            data = invalid_datatype_payload,
+            headers = access_token_header
+        )
+        
+        # Verify PUT status code
+        if response_put.status_code == requests.codes.ok:
+            response_put_dict = response_put.json()
+            if response_put_dict['code'] != 422:
+                print(response_put)
+                errors.append('\nStatus Error: Received {}, Expected 422'\
+                    .format(response_put_dict['code']))
+            # Verify correct error messages in data
+            elif response_put_dict['data'] != [{'field': 'status', 'message': 'can be Active or Inactive'}]:
+                print(response_put_dict['data'])
+                errors.append('\nPayload Error: Did not receive expected error messages')
+        else:
+            errors.append("\nServer Error: PUT request Failed. Received {}, expected 200"\
+                .format(response_put.status_code))
+            
+        assert not errors, "\nErrors Occured:\n{}".format("\n".join(errors))
+    
+    def test_empty_payload(self, user_endpoint, token, timeout_threshold):
+        errors = []
+        # PUT new user information to user created by POST
+        user_id = str(get_valid_user_id(user_endpoint))
+        user_url = user_endpoint + "/" + user_id
+        response_get = requests.get(user_url)
+        access_token_header = {"Authorization": "Bearer " + token}
+        response_put = requests.put(
+            url = user_url,
+            headers = access_token_header
+        )
+        if response_put.status_code  == response_get.status_code == requests.codes.ok:
+            if not same_user(response_put.json()['data'], response_get.json()['data']):
+                errors.append("Status Error: PUT response is not the same as GET")
+        else:
+            errors.append('Request Error: Server responded {} and {} respectively, expected 200 for both'\
+                .format(response_put.status_code, response_get.status_code))
+
+        assert not errors, "Errors Occured:\n{}".format("\n".join(errors))

@@ -29,15 +29,6 @@ def valid_payload():
     return payload
 
 @pytest.fixture(scope='session')
-def valid_payload2():
-    payload = {
-        "name": "Ilya Shkapo",
-        "gender" : "Male",
-        "status" : "Inactive"
-    }
-    return payload
-
-@pytest.fixture(scope='session')
 def missing_value_payload():
     payload = {
         "name": "Patrick Campos",
@@ -139,7 +130,7 @@ def is_same_response(response1, response2):
         return False
 
 # Converts response JSONs into string form and verifies they are equal.
-def correctly_posted_user(response_get_dict, payload):
+def same_user(response_get_dict, payload):
     return all([
         response_get_dict['name'] ==  payload['name'],
         response_get_dict['email'] ==  payload['email'],
@@ -209,22 +200,21 @@ def make_email_free(url, email, token):
         return False
 
 def make_resource_empty(url, token):
-    print("\n\nVerifying if {} exists".format(url))
     response = requests.get(url)
     if response.status_code == requests.codes.ok:
         try:
             response_dict = response.json()
             if response_dict['code'] == requests.codes.not_found:
-                print('{} is free'.format(email))
+                print('\n{} is free'.format(url))
                 return True
             else:
-                print('Result found. Attempting to delete')
+                print('\nResult found. Attempting to delete')
                 return user_resource_delete(url = url, token = token)
         except:
-            print ("Unexpected error:", sys.exc_info()[0])
+            print ("\nUnexpected error:", sys.exc_info()[0])
             return False
     else:
-        print("GET method was unsuccessful ({})".format(response.status_code))
+        print("\nGET method was unsuccessful ({})".format(response.status_code))
         return False
 
 def correct_empty_payload(received_payload):
