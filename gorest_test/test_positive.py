@@ -14,7 +14,6 @@ class Test_GET_User:
         errors = []
         # GET request to endpoint
         response = requests.get(user_endpoint)
-        response_dict = is_proper_json(response)
 
         # Verify Request was well taken by Server
         if response.status_code == requests.codes.ok:
