@@ -3,7 +3,12 @@
 ## Description
 This repository contains Python scripts performing automated endpoint verification for RESTful API using pytest. The current implementation queries the https://gorest.co.in server. It performs positive and negative tests for three endpoints: `GET /public-api/users`, `POST /public-api/users`, and `PUT /public-api/users/###` (where ### corresponds to the UUID of a valid user.)
 
-The repository contains its own python virtual environment to ensure the tests are reproducible regardless of the system. All tests are contained in the gorest_test folder. A token.txt file containting a valid bearer token to the https://gorest.co.in server is needed to perform the tests. This text file should be automatically created after using the setup.py script. The tests are within the `test_poitive.py` and `test_negative.py` files respectively. They both depend on the `verification.py` which contains pytest fixtures and useful testing functions.
+All tests are contained in the gorest_test folder. A token.txt file containting a valid bearer token to the https://gorest.co.in server is needed to perform the tests. This text file should be automatically created after using the setup.py script. The tests are within the `test_poitive.py` and `test_negative.py` files respectively. They both depend on the `verification.py` which contains pytest fixtures and useful testing functions.
+
+## Instructions
+1) Confirm all required packages are installed by running `pip3 install -r requirements.txt`
+2) Confirm token.txt file exists by running `python3 setup.py` and inputting a valid bearer token to the https://gorest.co.in server.
+3) Run pytest from the main folder (NOT gorest_test folder)
 
 ## Testing Criteria
 Each positive or negative test will perform specific combination of test actions. The list is:
