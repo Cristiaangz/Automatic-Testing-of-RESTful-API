@@ -24,7 +24,16 @@ def valid_payload():
         "name": "Dan Doney",
         "email": "dan@safemoney.com",
         "gender" : "Male",
-        "status" : "Active",
+        "status" : "Active"
+    }
+    return payload
+
+@pytest.fixture(scope='session')
+def valid_payload2():
+    payload = {
+        "name": "Ilya Shkapo",
+        "gender" : "Male",
+        "status" : "Inactive"
     }
     return payload
 
@@ -138,6 +147,14 @@ def correctly_posted_user(response_get_dict, payload):
         response_get_dict['status'] ==  payload['status'],
     ])
 
+# Converts response JSONs into string form and verifies they are equal.
+def correctly_put_user(response_get_dict, payload):
+    return all([
+        response_get_dict['name'] ==  payload['name'],
+        response_get_dict['gender'] ==  payload['gender'],
+        response_get_dict['status'] ==  payload['status'],
+    ])
+
 def user_resource_exists(url):
     response = requests.get(url)
     return response.status_code == requests.codes.ok
@@ -180,7 +197,7 @@ def make_email_free(url, email, token):
                 print('{} is free'.format(email))
                 return True
             elif response_dict['data'][0]['email'] == email:
-                print('Result found{}. Attempting to delete'.format(response_dict['data'][0]['email']))
+                print('Result found {}. Attempting to delete'.format(response_dict['data'][0]['email']))
                 user_id = response_dict['data'][0]['id']
                 user_url = url + '/{}'.format(user_id)
                 return user_resource_delete(url = user_url, token=token)
@@ -218,3 +235,12 @@ def correct_empty_payload(received_payload):
         {'field': 'status', 'message': "can't be blank"}
     ]
     return expected == received_payload
+
+def get_valid_user_id(user_endpoint):
+    response = requests.get(user_endpoint)
+    response_dict = is_proper_json(response)
+    if response_dict != False:
+        user_id = response_dict['data'][0]['id']
+        return user_id
+    else:
+        return False
