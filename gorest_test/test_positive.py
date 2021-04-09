@@ -2,12 +2,9 @@ from verification import *
 
 class Test_GET_User:
 
-    def test_GET_basic(self):
-        global main_url
-        global user_endpoint
+    def test_GET_basic(self, user_endpoint, timeout_threshold):
         errors = []
-        url = main_url + user_endpoint
-        response = requests.get(url)
+        response = requests.get(user_endpoint)
         response_dict = is_proper_json(response)
         if response_dict != False:
             if response_dict['code'] != requests.codes.ok:
@@ -26,22 +23,19 @@ class Test_GET_User:
 
         assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
     
-    def test_GET_idempotency(self):
-        global main_url
-        global user_endpoint
+    def test_GET_idempotency(self, user_endpoint):
         errors = []
-        url = main_url + user_endpoint
-        response1 = requests.get(url)
-        response2 = requests.get(url)
+        response1 = requests.get(user_endpoint)
+        response2 = requests.get(user_endpoint)
         if not is_same_response(response1, response2):
             errors.append("Response JSONs are not the same")
         assert not errors, "Errors Occured:\n{}".format("\n".join(errors))
 
 class Test_POST_User:
 
-    def test_POST_basic(self):
+    def test_POST_basic(self, user_endpoint, valid_payload,token, timeout_threshold):
         errors = []
-        url = main_url + user_endpoint
+        url = user_endpoint
         if make_email_free(url, valid_payload['email'], token):
             access_token_header = "Bearer " + token
             response_post = requests.post(

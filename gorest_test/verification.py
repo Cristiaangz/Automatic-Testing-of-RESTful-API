@@ -6,35 +6,35 @@ import sys
 import random
 import os.path
 
-def setup_module(module):
-    print("\n------------- SETUP -------------")
-    global main_url
-    global user_endpoint
-    global token
-    global valid_payload
-    global timeout_threshold, user_123_payload
-    main_url = "https://gorest.co.in"
-    user_endpoint = "/public-api/users"
-    timeout_threshold = 1.000
-    valid_payload = {
-            "name": "Dan Doney",
-            "email": "dan@securrency.com",
-            "gender" : "Male",
-            "status" : "Active",
-        }
+@pytest.fixture(scope='session')
+def main_url():
+    return "https://gorest.co.in"
 
-    user_123_payload = {
-            "id" : 1,
-            "name": "Ilya Shkapo",
-            "email": "ilya@securrency.com",
-            "gender" : "Male",
-            "status" : "Inactive",
-        }
-    
+@pytest.fixture(scope='session')
+def user_endpoint():
+    return "https://gorest.co.in/public-api/users"
+
+@pytest.fixture(scope='session')
+def timeout_threshold():
+    return 1.000
+
+@pytest.fixture(scope='session')
+def valid_payload():
+    payload = {
+        "name": "Dan Doney",
+        "email": "dan@securrency.com",
+        "gender" : "Male",
+        "status" : "Active",
+    }
+    return payload
+
+@pytest.fixture(scope='session')
+def token():
     if os.path.isfile("token.txt"):
         f = open("token.txt", "r")
         token = f.readline()
         f.close()
+        return token
     else:
         token = ''
         while token == '':
@@ -42,6 +42,7 @@ def setup_module(module):
             if len(token) != 64:
                 print("Error: Token must be 64 characters long")
                 token = ''
+        return token
 
 # Valid ID must be a non-negative integer
 def is_id(id):
@@ -164,8 +165,8 @@ def make_email_free(url, email, token):
         return False
 
 def make_resource_empty(url, token):
-    print("\nVerifying if {} exists".format(email))
-    response = requests.get(url, params={'email': email})
+    print("\nVerifying if {} exists".format(url))
+    response = requests.get(url)
     if response.status_code == requests.codes.ok:
         print("GET method successful")
         try:

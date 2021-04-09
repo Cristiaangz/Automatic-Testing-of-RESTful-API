@@ -3,9 +3,10 @@ from verification import *
 
 class Test_GET_User:
 
-    def test_missing_resource(self):
+    def test_missing_resource(self, user_endpoint, token, timeout_threshold):
+        errors = []
         user_id = random.randint(1,999)
-        url = main_url + user_endpoint + "/{}".format(user_id)
+        url = user_endpoint + "/{}".format(user_id)
         if make_resource_empty(url=url, token=token):
             response = requests.get(url)
             response_dict = is_proper_json(response)
