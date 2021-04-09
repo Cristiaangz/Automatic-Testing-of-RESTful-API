@@ -22,9 +22,38 @@ def timeout_threshold():
 def valid_payload():
     payload = {
         "name": "Dan Doney",
-        "email": "dan@securrency.com",
+        "email": "dan@safemoney.com",
         "gender" : "Male",
         "status" : "Active",
+    }
+    return payload
+
+@pytest.fixture(scope='session')
+def missing_value_payload():
+    payload = {
+        "name": "Patrick Campos",
+        "email": "pat@safemoney.com",
+        "gender" : "Male"
+    }
+    return payload
+
+@pytest.fixture(scope='session')
+def invalid_value_payload():
+    payload = {
+        "name": "John Doe",
+        "email": "john@safemoney.com",
+        "gender" : "Nonbinary",
+        "status" : "Active"
+    }
+    return payload
+
+@pytest.fixture(scope='session')
+def invalid_datatype_payload():
+    payload = {
+        "name": "Jeff Truitt",
+        "email": "jeff@safemoney.com",
+        "gender" : "Male",
+        "status" : 1,
     }
     return payload
 
@@ -36,13 +65,11 @@ def token():
         f.close()
         return token
     else:
-        token = ''
-        while token == '':
-            token = input("\n\nToken file not found. Please enter gorest.co.in token:\n")
-            if len(token) != 64:
-                print("Error: Token must be 64 characters long")
-                token = ''
-        return token
+        pytest.exit('Token file not found. Hint: run setup.py again')
+
+@pytest.fixture(scope='session')
+def invalid_token():
+    return '90a5606d1cc51be7d824fdd9c19201273b890961e8e4720d8045b9476de020da'
 
 # Valid ID must be a non-negative integer
 def is_id(id):
@@ -153,7 +180,7 @@ def make_email_free(url, email, token):
                 print('{} is free'.format(email))
                 return True
             elif response_dict['data'][0]['email'] == email:
-                print('Result found. Attempting to delete')
+                print('Result found{}. Attempting to delete'.format(response_dict['data'][0]['email']))
                 user_id = response_dict['data'][0]['id']
                 user_url = url + '/{}'.format(user_id)
                 return user_resource_delete(url = user_url, token=token)
@@ -165,10 +192,9 @@ def make_email_free(url, email, token):
         return False
 
 def make_resource_empty(url, token):
-    print("\nVerifying if {} exists".format(url))
+    print("\n\nVerifying if {} exists".format(url))
     response = requests.get(url)
     if response.status_code == requests.codes.ok:
-        print("GET method successful")
         try:
             response_dict = response.json()
             if response_dict['code'] == requests.codes.not_found:
@@ -183,3 +209,12 @@ def make_resource_empty(url, token):
     else:
         print("GET method was unsuccessful ({})".format(response.status_code))
         return False
+
+def correct_empty_payload(received_payload):
+    expected = [
+        {'field': 'email','message': "can't be blank"},
+        {'field': 'name', 'message': "can't be blank"},
+        {'field': 'gender', 'message': "can't be blank"},
+        {'field': 'status', 'message': "can't be blank"}
+    ]
+    return expected == received_payload
