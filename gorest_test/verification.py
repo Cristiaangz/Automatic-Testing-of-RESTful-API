@@ -68,8 +68,12 @@ def invalid_datatype_payload():
 @pytest.fixture(scope='session')
 def token():
     """A simple pytest fixture that returns the bearer token needed for some HTTP requests."""
+
     if os.path.isfile("token.txt"):
-        f = open("token.txt", "r")
+        pytest.exit('Please run pytest from repository main folder')
+
+    elif os.path.isfile("gorest_test/token.txt"):
+        f = open("gorest_test/token.txt", "r")
         token = f.readline()
         f.close()
         return token
